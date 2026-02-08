@@ -46,44 +46,30 @@ public class JWDFilter extends OncePerRequestFilter {
 
         // 2️⃣ Extract token properly
         String jwt_tokenToken = authorization.substring(7);
-        String username = jwtService.getUsername(jwt_tokenToken);
+        String username = jwtService.extractUsername(jwt_tokenToken);
 
-        if (username == null) {
-            filterChain.doFilter(request,response);
-            return;
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            User user = userRepository.findByUserName(username).orElse(null);
+
+            if (user != null) {
+                UserDetails userDetails = org.springframework.security.core.userdetails.User
+                        .withUsername(user.getUserName())
+                        .password(user.getPassword())
+                        .roles("USER")
+                        .build();
+
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request));
+
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
         }
 
-        // 3️⃣ If already authenticated → skip
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        User userData = userRepository.findByUserName(username).orElse(null);
-
-        if (userData == null) {
-            filterChain.doFilter(request,response);
-            return;
-        }
-
-        //if (SecurityContextHolder.getContext().getAuthentication() != null) filterChain.doFilter(request,response);
-
-        //4️⃣ Create UserDetails (IMPORTANT: Use Spring Security User)
-        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
-                .username(userData.getUserName())
-                .password(userData.getPassword())
-                .authorities("USER") // add roles if needed
-                .build();
-
-        UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
-
-        token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-        SecurityContextHolder.getContext().setAuthentication(token);
         //System.out.println(jwt_token);
         filterChain.doFilter(request, response);
     }

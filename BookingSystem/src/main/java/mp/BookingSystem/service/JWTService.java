@@ -16,19 +16,23 @@ public class JWTService {
 
     /* Generate Key */
     public JWTService() {
-        try{
-            SecretKey k = KeyGenerator.getInstance("HmacSHA256").generateKey();
-            secretKey = Keys.hmacShaKeyFor(k.getEncoded());
-        }catch (Exception e){
-            throw new RuntimeException(e);
-        }
+//        try{
+//            SecretKey k = KeyGenerator.getInstance("HmacSHA256").generateKey();
+//            secretKey = Keys.hmacShaKeyFor(k.getEncoded());
+//        }catch (Exception e){
+//            throw new RuntimeException(e);
+//        }
+        this.secretKey = Keys.hmacShaKeyFor(
+                "my-super-secret-key-my-super-secret-key"
+                        .getBytes()
+        );
     }
 
     /*Generate token*/
-    public String getJWTToken(){
+    public String generateToken(String username){
         return Jwts.builder()
-                .subject("Booking System")
-                //.subject(username)
+                //.subject("Booking System")
+                .subject(username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000*60*60*24))
                 .signWith(secretKey)
@@ -36,13 +40,13 @@ public class JWTService {
     }
 
     /* get the username from to JWT token */
-    public String getUsername(String token){
+    public String extractUsername(String token){
         try {
-            return Jwts
-                    .parser()
-                    .verifyWith(secretKey).build()
-                    .parseSignedClaims(token)
-                    .getPayload()
+            return Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
                     .getSubject();
         } catch (Exception e){
             return null; //return "Invalied token";
