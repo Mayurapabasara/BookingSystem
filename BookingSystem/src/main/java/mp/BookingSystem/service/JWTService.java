@@ -28,7 +28,7 @@ public class JWTService {
     public String getJWTToken(){
         return Jwts.builder()
                 .subject("Booking System")
-                .issuedAt(new Date(System.currentTimeMillis()))
+                .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000*60*60*24))
                 .signWith(secretKey)
                 .compact();
