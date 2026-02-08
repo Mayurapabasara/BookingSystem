@@ -1,31 +1,32 @@
 package mp.BookingSystem.service;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.core.userdetails.User;
+import mp.BookingSystem.model.User;
+import mp.BookingSystem.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+
 
 //@Service
 public class CustomUserDetailService implements UserDetailsService {
 
-    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
-    public CustomUserDetailService(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
+    public CustomUserDetailService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        mp.BookingSystem.model.User userData =
+                userRepository.findByUserName(username)
+                        .orElseThrow(() ->
+                                new UsernameNotFoundException("User not found"));
 
-        UserDetails user = User.builder()
-                .username("mayura")
-                .password(passwordEncoder.encode("mp123"))
+        return org.springframework.security.core.userdetails.User
+                .withUsername(userData.getUserName()) //get the value from database
+                .password(userData.getPassword()) //get the value from database
                 .roles("USER")
                 .build();
-        return user;
     }
 }

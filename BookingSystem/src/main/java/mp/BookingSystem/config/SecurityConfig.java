@@ -1,5 +1,6 @@
 package mp.BookingSystem.config;
 
+import mp.BookingSystem.repository.UserRepository;
 import mp.BookingSystem.service.CustomUserDetailService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,12 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final UserRepository userRepository;
+
+    public SecurityConfig(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
 
     @Bean
@@ -52,6 +59,6 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new CustomUserDetailService(passwordEncoder());
+        return new CustomUserDetailService(userRepository);
     }
 }
