@@ -28,6 +28,7 @@ public class JWTService {
     public String getJWTToken(){
         return Jwts.builder()
                 .subject("Booking System")
+                //.subject(username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000*60*60*24))
                 .signWith(secretKey)
@@ -44,7 +45,7 @@ public class JWTService {
                     .getPayload()
                     .getSubject();
         } catch (Exception e){
-            return "Invalied token";
+            return null; //return "Invalied token";
         }
     }
 

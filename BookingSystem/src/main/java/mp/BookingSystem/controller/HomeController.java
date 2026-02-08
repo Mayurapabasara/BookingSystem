@@ -28,6 +28,6 @@ public class HomeController {
     @GetMapping("/username")
     public String getUsername(@RequestParam String token){
         return jwtService.getUsername(token);
-    }
+    } //token aken username genimata yoda gane
 
 }

@@ -1,5 +1,6 @@
 package mp.BookingSystem.config;
 
+import mp.BookingSystem.filter.JWDFilter;
 import mp.BookingSystem.repository.UserRepository;
 import mp.BookingSystem.service.CustomUserDetailService;
 import org.springframework.context.annotation.Bean;
@@ -14,15 +15,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private final UserRepository userRepository;
+    private final JWDFilter jwdFilter;
 
-    public SecurityConfig(UserRepository userRepository) {
+    public SecurityConfig(UserRepository userRepository, JWDFilter jwdFilter) {
         this.userRepository = userRepository;
+        this.jwdFilter = jwdFilter;
     }
 
 
@@ -39,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/login", "/register").permitAll()
                         .anyRequest().authenticated()
                 )
+                .addFilterBefore(jwdFilter, UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider)
                 .httpBasic(Customizer.withDefaults())
                 .build();
