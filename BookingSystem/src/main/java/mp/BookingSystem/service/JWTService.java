@@ -3,6 +3,7 @@ package mp.BookingSystem.service;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
@@ -12,35 +13,43 @@ import java.util.Date;
 @Service
 public class JWTService {
 
-    private final SecretKey secretKey;
+    private SecretKey secretKey;
 
-    /* Generate Key */
-    public JWTService() {
-        try{
-            SecretKey k = KeyGenerator.getInstance("HmacSHA256").generateKey();
-            secretKey = Keys.hmacShaKeyFor(k.getEncoded());
-        }catch (Exception e){
-            throw new RuntimeException(e);
-        }
+    private final String SECRET = "my-super-ecret-key-for-booking-system";
+
+    @PostConstruct
+    public void init(){
+        secretKey = Keys.hmacShaKeyFor(SECRET.getBytes());
     }
 
+    /* Generate Key */
+//    public JWTService() {
+//        try{
+//            SecretKey k = KeyGenerator.getInstance("HmacSHA256").generateKey();
+//            secretKey = Keys.hmacShaKeyFor(k.getEncoded());
+//        }catch (Exception e){
+//            throw new RuntimeException(e);
+//        }
+//    }
+
     /*Generate token*/
-    public String getJWTToken(){
+    public String getJWTToken(String username){
         return Jwts.builder()
-                .subject("Booking System")
-                //.subject(username)
+                //.subject("Booking System")
+                .subject(username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000*60*60*24))
                 .signWith(secretKey)
                 .compact();
     }
 
-    /* get the username from to JWT token */
+    /* get the username from to JWT token (JWT secret key changes every time application restarts)*/
     public String getUsername(String token){
         try {
             return Jwts
                     .parser()
-                    .verifyWith(secretKey).build()
+                    .verifyWith(secretKey)
+                    .build()
                     .parseSignedClaims(token)
                     .getPayload()
                     .getSubject();
