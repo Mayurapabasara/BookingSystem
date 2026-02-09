@@ -10,5 +10,8 @@ public class LoginRequest {
     private String username;
     private String password;
 
+<<<<<<< Updated upstream
     // getters and setters
+=======
+>>>>>>> Stashed changes
 }
