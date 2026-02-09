@@ -1,9 +1,11 @@
 package mp.BookingSystem.service;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
@@ -12,6 +14,9 @@ import java.util.Date;
 
 @Service
 public class JWTService {
+
+    @Value("${jwt.secret}")
+    private String secret;
 
     private SecretKey secretKey;
 
@@ -46,15 +51,14 @@ public class JWTService {
     /* get the username from to JWT token (JWT secret key changes every time application restarts)*/
     public String getUsername(String token){
         try {
-            return Jwts
-                    .parser()
-                    .verifyWith(secretKey)
+            Claims claims = Jwts.parser()
+                    .setSigningKey(secretKey)
                     .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getSubject();
-        } catch (Exception e){
-            return null; //return "Invalied token";
+                    .parseClaimsJws(token)
+                    .getBody();
+            return claims.getSubject();
+        } catch (Exception e) {
+            return null;
         }
     }
 

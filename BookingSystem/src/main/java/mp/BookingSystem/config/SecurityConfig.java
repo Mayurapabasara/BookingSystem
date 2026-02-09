@@ -5,6 +5,7 @@ import mp.BookingSystem.repository.UserRepository;
 import mp.BookingSystem.service.CustomUserDetailService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -40,13 +41,14 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/login", "/register").permitAll()
-                        .requestMatchers("/auth").permitAll()   // allow register
+                        .requestMatchers("/", "/login","/register","/auth/login").permitAll()
+                        //.requestMatchers(HttpMethod.POST, "/register").permitAll()
+                        //.requestMatchers("/auth").permitAll()   // allow register
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwdFilter, UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider)
-                .httpBasic(Customizer.withDefaults())
+                //.httpBasic(Customizer.withDefaults())
                 .build();
     }
 

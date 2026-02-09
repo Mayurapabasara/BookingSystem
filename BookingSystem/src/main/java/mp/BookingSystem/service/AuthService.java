@@ -20,17 +20,9 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    public User createUser(User userData){
-        User newUser = new User(
-                userData.getFullName(),
-                userData.getEmail(),
-                userData.getUserName(),
-                passwordEncoder.encode(userData.getPassword()));
-
-        return userRepository.save(newUser);
+    public User register(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole("USER");
+        return userRepository.save(user);
     }
 }

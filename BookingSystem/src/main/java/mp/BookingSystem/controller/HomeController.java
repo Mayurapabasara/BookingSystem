@@ -19,9 +19,14 @@ public class HomeController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping
-    public String getHellow(){
+    @GetMapping("/")
+    public String Home(){
         return "Hello World";
+    }
+
+    @GetMapping("/profile")
+    public String profile() {
+        return "Protected Endpoint - JWT Working!";
     }
 
 //    @PostMapping("/login")
@@ -30,22 +35,19 @@ public class HomeController {
 //    }
 
 
-    @PostMapping("/login")
-    public String login(@RequestBody User loginUser) {
-
-        User user = userRepository
-                .findByUserName(loginUser.getUserName())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        if (!passwordEncoder.matches(loginUser.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
-        }
-
-        return jwtService.getJWTToken(user.getUserName());
-    }
-
-
-
+//    @PostMapping("/login")
+//    public String login(@RequestBody User loginUser) {
+//
+//        User user = userRepository
+//                .findByUserName(loginUser.getUserName())
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        if (!passwordEncoder.matches(loginUser.getPassword(), user.getPassword())) {
+//            throw new RuntimeException("Invalid password");
+//        }
+//
+//        return jwtService.getJWTToken(user.getUserName());
+//    }
 
     @GetMapping("/username")
     public String getUsername(@RequestParam String token){

@@ -48,43 +48,21 @@ public class JWDFilter extends OncePerRequestFilter {
         String jwt_tokenToken = authorization.substring(7);
         String username = jwtService.getUsername(jwt_tokenToken);
 
-        if (username == null) {
-            filterChain.doFilter(request,response);
-            return;
+
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            User user = userRepository.findByUserName(username).orElse(null);
+
+            if (user != null) {
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                username,
+                                null,
+                                java.util.List.of(() -> "ROLE_" + user.getRole())
+                        );
+
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
         }
-
-        // 3️⃣ If already authenticated → skip
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        User userData = userRepository.findByUserName(username).orElse(null);
-
-        if (userData == null) {
-            filterChain.doFilter(request,response);
-            return;
-        }
-
-        //if (SecurityContextHolder.getContext().getAuthentication() != null) filterChain.doFilter(request,response);
-
-        //4️⃣ Create UserDetails (IMPORTANT: Use Spring Security User)
-        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
-                .username(userData.getUserName())
-                .password(userData.getPassword())
-                .authorities("USER") // add roles if needed
-                .build();
-
-        UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities());
-
-        token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-        SecurityContextHolder.getContext().setAuthentication(token);
-        //System.out.println(jwt_token);
         filterChain.doFilter(request, response);
     }
 }
