@@ -3,6 +3,7 @@ package mp.BookingSystem.service;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
@@ -12,26 +13,13 @@ import java.util.Date;
 @Service
 public class JWTService {
 
+    @Value("${jwt.secret}") //private final String SECRET = "my-super-ecret-key-for-booking-system";
+    private String secret;
+
     private final SecretKey secretKey;
 
     /* Generate Key */
     public JWTService() {
-<<<<<<< Updated upstream
-//        try{
-//            SecretKey k = KeyGenerator.getInstance("HmacSHA256").generateKey();
-//            secretKey = Keys.hmacShaKeyFor(k.getEncoded());
-//        }catch (Exception e){
-//            throw new RuntimeException(e);
-//        }
-        this.secretKey = Keys.hmacShaKeyFor(
-                "my-super-secret-key-my-super-secret-key"
-                        .getBytes()
-        );
-    }
-
-    /*Generate token*/
-    public String generateToken(String username){
-=======
         try{
             SecretKey k = KeyGenerator.getInstance("HmacSHA256").generateKey();
             secretKey = Keys.hmacShaKeyFor(k.getEncoded());
@@ -41,8 +29,7 @@ public class JWTService {
     }
 
     /*Generate token*/
-    public String getJWTToken(){
->>>>>>> Stashed changes
+    public String getJWTToken(String username){
         return Jwts.builder()
                 .subject("Booking System")
                 //.subject(username)
@@ -53,15 +40,6 @@ public class JWTService {
     }
 
     /* get the username from to JWT token */
-<<<<<<< Updated upstream
-    public String extractUsername(String token){
-        try {
-            return Jwts.parser()
-                    .setSigningKey(secretKey)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody()
-=======
     public String getUsername(String token){
         try {
             return Jwts
@@ -69,7 +47,6 @@ public class JWTService {
                     .verifyWith(secretKey).build()
                     .parseSignedClaims(token)
                     .getPayload()
->>>>>>> Stashed changes
                     .getSubject();
         } catch (Exception e){
             return null; //return "Invalied token";

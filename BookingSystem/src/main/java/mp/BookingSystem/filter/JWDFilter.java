@@ -46,32 +46,6 @@ public class JWDFilter extends OncePerRequestFilter {
 
         // 2️⃣ Extract token properly
         String jwt_tokenToken = authorization.substring(7);
-<<<<<<< Updated upstream
-        String username = jwtService.extractUsername(jwt_tokenToken);
-
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-            User user = userRepository.findByUserName(username).orElse(null);
-
-            if (user != null) {
-                UserDetails userDetails = org.springframework.security.core.userdetails.User
-                        .withUsername(user.getUserName())
-                        .password(user.getPassword())
-                        .roles("USER")
-                        .build();
-
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities());
-
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
-        }
-
-=======
         String username = jwtService.getUsername(jwt_tokenToken);
 
         if (username == null) {
@@ -110,7 +84,6 @@ public class JWDFilter extends OncePerRequestFilter {
         token.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
         SecurityContextHolder.getContext().setAuthentication(token);
->>>>>>> Stashed changes
         //System.out.println(jwt_token);
         filterChain.doFilter(request, response);
     }
