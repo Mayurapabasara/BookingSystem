@@ -20,6 +20,11 @@ public class HomeController {
         return "Hello World";
     }
 
+    @GetMapping("/profile")
+    public String Profile(){
+        return "Hello Profile";
+    }
+
 //    @PostMapping("/login")
 //    public String login(){
 //        return jwtService.getJWTToken();
