@@ -3,12 +3,14 @@ package mp.BookingSystem.service;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class JWTService {
@@ -16,7 +18,12 @@ public class JWTService {
     @Value("${jwt.secret}") //private final String SECRET = "my-super-ecret-key-for-booking-system";
     private String secret;
 
-    private final SecretKey secretKey;
+    private SecretKey secretKey;
+
+    @PostConstruct
+    public void init() {
+        secretKey = Keys.hmacShaKeyFor(secret.getBytes());
+    }
 
     /* Generate Key */
     public JWTService() {
@@ -31,13 +38,17 @@ public class JWTService {
     /*Generate token*/
     public String getJWTToken(String username){
         return Jwts.builder()
-                .subject("Booking System")
-                //.subject(username)
+                //.subject("Booking System")
+                .subject(username)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + 1000*60*60*24))
                 .signWith(secretKey)
                 .compact();
     }
+
+//    public String generateRefreshToken(String username) {
+//        return UUID.randomUUID().toString();
+//    }
 
     /* get the username from to JWT token */
     public String getUsername(String token){
@@ -52,6 +63,19 @@ public class JWTService {
             return null; //return "Invalied token";
         }
     }
+
+    public String generateAccessToken(String username){
+        return Jwts.builder()
+                .subject(username)
+                .expiration(new Date(System.currentTimeMillis() + 1000*60*15))
+                .signWith(secretKey)
+                .compact();
+    }
+
+    public String generateRefreshToken(String username){
+        return UUID.randomUUID().toString();
+    }
+
 
 }
 

@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mp.BookingSystem.model.User;
+import mp.BookingSystem.repository.BlacklistRepository;
 import mp.BookingSystem.repository.UserRepository;
 import mp.BookingSystem.service.JWTService;
 import org.jspecify.annotations.NonNull;
@@ -23,10 +24,13 @@ public class JWDFilter extends OncePerRequestFilter {
 
     private final JWTService jwtService;
     private final UserRepository userRepository;
+    private final BlacklistRepository blacklistRepo;
 
-    public JWDFilter(JWTService jwtService, UserRepository userRepository) {
+
+    public JWDFilter(JWTService jwtService, UserRepository userRepository,BlacklistRepository blacklistRepo) {
         this.jwtService = jwtService;
         this.userRepository = userRepository;
+        this.blacklistRepo = blacklistRepo;
     }
 
     @Override
@@ -66,13 +70,18 @@ public class JWDFilter extends OncePerRequestFilter {
             return;
         }
 
+        if (blacklistRepo.existsByToken(jwt_tokenToken)) {
+            filterChain.doFilter(request,response);
+            return;
+        }
+
         //if (SecurityContextHolder.getContext().getAuthentication() != null) filterChain.doFilter(request,response);
 
         //4️⃣ Create UserDetails (IMPORTANT: Use Spring Security User)
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
                 .username(userData.getUserName())
                 .password(userData.getPassword())
-                .authorities("USER") // add roles if needed
+                .authorities("ROLE_" + userData.getRole())// add roles if needed
                 .build();
 
         UsernamePasswordAuthenticationToken token =
